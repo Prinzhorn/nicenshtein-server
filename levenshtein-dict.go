@@ -6,10 +6,12 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 	"unicode/utf8"
 )
 
+//A Trie structure that maps runes to a list of following (child-) runes.
 type node struct {
 	children map[rune]*node
 	word     string
@@ -17,11 +19,11 @@ type node struct {
 
 var root node = node{make(map[rune]*node), ""}
 
-func indexFile(fileName string) {
+func indexFile(fileName string) error {
 	file, err := os.Open(fileName)
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	defer file.Close()
@@ -29,15 +31,22 @@ func indexFile(fileName string) {
 	scanner := bufio.NewScanner(file)
 
 	for scanner.Scan() {
-		addToIndex(scanner.Text())
+		nextWord := strings.TrimSpace(scanner.Text())
+		indexWord(nextWord)
 	}
 
 	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
+		return err
 	}
+
+	return nil
 }
 
-func addToIndex(word string) {
+func indexWord(word string) {
+	if len(word) == 0 {
+		return
+	}
+
 	var currentNode *node = &root
 
 	for index, runeValue := range word {
@@ -60,7 +69,7 @@ func addToIndex(word string) {
 	}
 }
 
-func findInIndex(word string) bool {
+func findWord(word string) bool {
 	var currentNode *node = &root
 
 	for _, runeValue := range word {
@@ -78,13 +87,14 @@ func findInIndex(word string) bool {
 	return currentNode.word != ""
 }
 
-func collectFromIndex(out *map[string]byte, currentNode *node, word string, distance byte, maxDistance byte) {
+func collectClosestWords(out *map[string]byte, currentNode *node, word string, distance byte, maxDistance byte) {
+	//We have eated all runes, let's see if we have reached a node with a valid word.
 	if len(word) == 0 {
 		if currentNode.word != "" {
-			value, ok := (*out)[currentNode.word]
+			knownDistance, ok := (*out)[currentNode.word]
 
 			//We have not seen this word or we have found a smaller distance.
-			if !ok || distance < value {
+			if !ok || distance < knownDistance {
 				(*out)[currentNode.word] = distance
 			}
 		}
@@ -94,31 +104,35 @@ func collectFromIndex(out *map[string]byte, currentNode *node, word string, dist
 
 	if distance < maxDistance {
 		for runeValue, _ := range currentNode.children {
-			//Substitution (replace the first character with the current one).
-			collectFromIndex(out, currentNode, string(runeValue)+word[1:], distance+1, maxDistance)
+			//Substitution (replace the first rune with the current one).
+			collectClosestWords(out, currentNode, string(runeValue)+word[1:], distance+1, maxDistance)
 
-			//Insertion (add the current character as prefix).
-			collectFromIndex(out, currentNode, string(runeValue)+word, distance+1, maxDistance)
+			//Insertion (add the current rune as prefix).
+			collectClosestWords(out, currentNode, string(runeValue)+word, distance+1, maxDistance)
 		}
 
-		//Deletion (skip first character).
-		collectFromIndex(out, currentNode, word[1:], distance+1, maxDistance)
+		//Deletion (skip first rune).
+		collectClosestWords(out, currentNode, word[1:], distance+1, maxDistance)
 	}
 
-	runeValue, _ := utf8.DecodeRuneInString(word[0:])
+	runeValue, _ := utf8.DecodeRuneInString(word)
 	nextNode := currentNode.children[runeValue]
 
 	if nextNode != nil {
-		//Move forward by one character without incrementing the distance.
-		collectFromIndex(out, nextNode, word[1:], distance, maxDistance)
+		//Move forward by one rune without incrementing the distance.
+		collectClosestWords(out, nextNode, word[1:], distance, maxDistance)
 	}
 }
 
 func main() {
 	start := time.Now()
-	indexFile(os.Args[1])
+	err := indexFile(os.Args[1])
 	elapsed := time.Now().Sub(start)
 	fmt.Println(elapsed)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	maxDistance, err := strconv.ParseInt(os.Args[3], 10, 8)
 
@@ -130,7 +144,7 @@ func main() {
 
 	start = time.Now()
 
-	collectFromIndex(&out, &root, os.Args[2], 0, byte(maxDistance))
+	collectClosestWords(&out, &root, os.Args[2], 0, byte(maxDistance))
 
 	elapsed = time.Now().Sub(start)
 
