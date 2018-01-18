@@ -7,16 +7,15 @@ import (
 	"os"
 	"strconv"
 	"time"
+	"unicode/utf8"
 )
 
-const ASCII_LOWER_CASE_A_OFFSET = 97
-
 type node struct {
-	next [26]*node
-	word string
+	children map[rune]*node
+	word     string
 }
 
-var root node
+var root node = node{make(map[rune]*node), ""}
 
 func indexFile(fileName string) {
 	file, err := os.Open(fileName)
@@ -39,49 +38,43 @@ func indexFile(fileName string) {
 }
 
 func addToIndex(word string) {
-	//TODO: use a big ass >slice< of the root instead, like 26 pieces.
-	var currentNodeList *[26]*node = &root.next
+	var currentNode *node = &root
 
-	for characterIndex := 0; characterIndex < len(word); characterIndex++ {
-		normalizedIndex := word[characterIndex] - ASCII_LOWER_CASE_A_OFFSET
+	for index, runeValue := range word {
+		childNode, ok := currentNode.children[runeValue]
 
-		//Add a new entry if the current character is not present.
-		if currentNodeList[normalizedIndex] == nil {
-			var newNodeList [26]*node
-
-			//The node at the end of the word stores the full word.
-			//This makes the index less memory efficient, but vastly improves query performance.
-			if characterIndex == len(word)-1 {
-				currentNodeList[normalizedIndex] = &node{newNodeList, word}
-			} else {
-				currentNodeList[normalizedIndex] = &node{newNodeList, ""}
-			}
+		//We have not indexed this rune yet, create a new entry.
+		if !ok {
+			childNode = &node{make(map[rune]*node), ""}
+			currentNode.children[runeValue] = childNode
 		}
 
-		currentNodeList = &currentNodeList[normalizedIndex].next
+		//The node at the end of a word stores the full word, which also marks the end.
+		//This makes the index less memory efficient, but vastly improves query performance.
+		//Otherwise each query would need to collect the runes along the path and concat the word.
+		if index == len(word)-len(string(runeValue)) {
+			childNode.word = word
+		}
+
+		currentNode = childNode
 	}
 }
 
 func findInIndex(word string) bool {
-	if len(word) == 0 {
-		return false
-	}
+	var currentNode *node = &root
 
-	var currentNodeList *[26]*node = &root.next
-	var currentNode *node
+	for _, runeValue := range word {
+		childNode, ok := currentNode.children[runeValue]
 
-	for characterIndex := 0; characterIndex < len(word); characterIndex++ {
-		normalizedIndex := word[characterIndex] - ASCII_LOWER_CASE_A_OFFSET
-
-		//Current character not found, it is not in the index.
-		if currentNodeList[normalizedIndex] == nil {
+		//Current rune not indexed.
+		if !ok {
 			return false
 		}
 
-		currentNode = currentNodeList[normalizedIndex]
-		currentNodeList = &currentNode.next
+		currentNode = childNode
 	}
 
+	//Does a string terminate at this node?
 	return currentNode.word != ""
 }
 
@@ -100,32 +93,23 @@ func collectFromIndex(out *map[string]byte, currentNode *node, word string, dist
 	}
 
 	if distance < maxDistance {
-		for i := 0; i < 26; i++ {
-			iNode := currentNode.next[i]
-
-			//There is no node for this character (no word in the index has this prefix).
-			if iNode == nil {
-				continue
-			}
-
-			currentCharacter := string(i + ASCII_LOWER_CASE_A_OFFSET)
-
+		for runeValue, _ := range currentNode.children {
 			//Substitution (replace the first character with the current one).
-			collectFromIndex(out, currentNode, currentCharacter+word[1:], distance+1, maxDistance)
+			collectFromIndex(out, currentNode, string(runeValue)+word[1:], distance+1, maxDistance)
 
 			//Insertion (add the current character as prefix).
-			collectFromIndex(out, currentNode, currentCharacter+word, distance+1, maxDistance)
+			collectFromIndex(out, currentNode, string(runeValue)+word, distance+1, maxDistance)
 		}
 
 		//Deletion (skip first character).
 		collectFromIndex(out, currentNode, word[1:], distance+1, maxDistance)
 	}
 
-	//Move forward by one character without incrementing the distance.
-	normalizedIndex := word[0] - ASCII_LOWER_CASE_A_OFFSET
-	nextNode := currentNode.next[normalizedIndex]
+	runeValue, _ := utf8.DecodeRuneInString(word[0:])
+	nextNode := currentNode.children[runeValue]
 
 	if nextNode != nil {
+		//Move forward by one character without incrementing the distance.
 		collectFromIndex(out, nextNode, word[1:], distance, maxDistance)
 	}
 }
