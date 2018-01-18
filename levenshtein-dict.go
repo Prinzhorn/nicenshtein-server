@@ -39,7 +39,7 @@ func indexFile(fileName string) {
 }
 
 func addToIndex(word string) {
-	//TODO: use a big ass slice of the root instead, like 26 pieces.
+	//TODO: use a big ass >slice< of the root instead, like 26 pieces.
 	var currentNodeList *[26]*node = &root.next
 
 	for characterIndex := 0; characterIndex < len(word); characterIndex++ {
@@ -131,7 +131,10 @@ func collectFromIndex(out *map[string]byte, currentNode *node, word string, dist
 }
 
 func main() {
+	start := time.Now()
 	indexFile(os.Args[1])
+	elapsed := time.Now().Sub(start)
+	fmt.Println(elapsed)
 
 	maxDistance, err := strconv.ParseInt(os.Args[3], 10, 8)
 
@@ -141,11 +144,11 @@ func main() {
 
 	out := make(map[string]byte)
 
-	start := time.Now()
+	start = time.Now()
 
 	collectFromIndex(&out, &root, os.Args[2], 0, byte(maxDistance))
 
-	elapsed := time.Now().Sub(start)
+	elapsed = time.Now().Sub(start)
 
 	for key, value := range out {
 		fmt.Println(key, value)
