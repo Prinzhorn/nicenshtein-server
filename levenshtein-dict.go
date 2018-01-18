@@ -4,8 +4,8 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -124,33 +124,32 @@ func collectClosestWords(out *map[string]byte, currentNode *node, word string, d
 	}
 }
 
+func handler(w http.ResponseWriter, r *http.Request) {
+	word := r.URL.Path[1:]
+	out := make(map[string]byte)
+
+	start := time.Now()
+
+	collectClosestWords(&out, &root, word, 0, 2)
+
+	log.Printf("Searched %s in %s\n", word, time.Now().Sub(start))
+
+	for word, distance := range out {
+		fmt.Fprintln(w, word, distance)
+	}
+}
+
 func main() {
 	start := time.Now()
+
 	err := indexFile(os.Args[1])
-	elapsed := time.Now().Sub(start)
-	fmt.Println(elapsed)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	maxDistance, err := strconv.ParseInt(os.Args[3], 10, 8)
+	log.Printf("Indexed in %s\n", time.Now().Sub(start))
 
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	out := make(map[string]byte)
-
-	start = time.Now()
-
-	collectClosestWords(&out, &root, os.Args[2], 0, byte(maxDistance))
-
-	elapsed = time.Now().Sub(start)
-
-	for key, value := range out {
-		fmt.Println(key, value)
-	}
-
-	fmt.Println(elapsed)
+	http.HandleFunc("/", handler)
+	http.ListenAndServe(":8080", nil)
 }
