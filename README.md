@@ -1,6 +1,6 @@
 # Nicenshtein Server
 
-HTTP Server for [nicenshtein](https://github.com/Prinzhorn/nicenshtein).
+HTTP Server for [Nicenshtein](https://github.com/Prinzhorn/nicenshtein).
 
 Answers GET requests with closest words according to Levenshtein distance <= 2.
 
