@@ -1,6 +1,5 @@
 FROM golang:alpine
 
-ADD . "/go/src/github.com/prinzhorn/nicenshtein-server"
 RUN apk add --no-cache git
 RUN go get "github.com/prinzhorn/nicenshtein-server"
 RUN apk del git
