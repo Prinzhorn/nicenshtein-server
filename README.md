@@ -1,509 +1,182 @@
-nicenshtein-server
-==================
+# Nicenshtein Server
 
-Answers requests with closest words.
+Answers GET requests with closest words according to Levenshtein distance <= 2.
 
-E.g. `GET /beer`
+So far two datasets are indexed. See [https://nicenshtein.now.sh](https://nicenshtein.now.sh).
 
-```
-wer 2
-aver 2
-hler 2
-peek 2
-keet 2
-rier 2
-ufer 2
-hoer 2
-bevy 2
-kever 2
-seder 2
-brev 2
-behen 2
-ceder 2
-her 2
-heed 2
-bleep 2
-tewer 2
-keel 2
-tier 2
-boser 2
-better 2
-mee 2
-bred 2
-veter 2
-beek 1
-geet 2
-ver 2
-beeps 2
-jee 2
-bour 2
-berber 2
-axer 2
-ewer 2
-ferr 2
-feel 2
-aberr 2
-eger 2
-leep 2
-neger 2
-neter 2
-dees 2
-yee 2
-sear 2
-beget 2
-becker 2
-weet 2
-seker 2
-bely 2
-bead 2
-teer 1
-aeger 2
-abear 2
-beta 2
-befur 2
-bena 2
-dee 2
-bels 2
-belee 2
-beth 2
-bleo 2
-pier 2
-geir 2
-lees 2
-vees 2
-bego 2
-seer 1
-ster 2
-neem 2
-duer 2
-aper 2
-besa 2
-lehr 2
-mbeuer 2
-vier 2
-baler 2
-bend 2
-cher 2
-ker 2
-teet 2
-feeb 2
-beedi 2
-meet 2
-ambeer 2
-omer 2
-obeyer 2
-hee 2
-boor 2
-mear 2
-tees 2
-boyer 2
-deem 2
-pees 2
-belter 2
-iter 2
-ruer 2
-een 2
-cees 2
-wheer 2
-geez 2
-sheer 2
-heel 2
-peep 2
-keep 2
-betel 2
-weel 2
-bender 2
-meed 2
-rees 2
-reek 2
-bete 2
-beent 2
-beet 1
-fever 2
-veen 2
-heder 2
-brees 2
-bess 2
-besew 2
-beery 2
-yer 2
-beeper 2
-bien 2
-bela 2
-der 2
-borer 2
-ller 2
-ameer 2
-per 2
-petr 2
-wear 2
-keir 2
-leed 2
-zer 2
-leer 1
-bedew 2
-berger 2
-benj 2
-brey 2
-jear 2
-speer 2
-weed 2
-bees 1
-seep 2
-jger 2
-leef 2
-teaer 2
-sher 2
-blet 2
-belk 2
-bene 2
-been 1
-bider 2
-bey 2
-afer 2
-exr 2
-bluer 2
-reed 2
-beaker 2
-keen 2
-eyr 2
-beezer 2
-bema 2
-veep 2
-daer 2
-fees 2
-beg 2
-beys 2
-imer 2
-bedel 2
-aker 2
-ger 2
-seed 2
-acer 2
-bled 2
-bec 2
-week 2
-belder 2
-bier 1
-beep 1
-deek 2
-zees 2
-hear 2
-beck 2
-cheer 2
-heir 2
-byes 2
-berk 2
-doer 2
-fer 2
-bldr 2
-blew 2
-bezel 2
-behn 2
-over 2
-roer 2
-herr 2
-neep 2
-bifer 2
-peed 2
-weem 2
-seen 2
-blur 2
-beau 2
-beets 2
-emer 2
-breed 2
-abler 2
-beers 2
-erer 2
-ter 2
-fear 2
-buhr 2
-gee 2
-freer 2
-teen 2
-bater 2
-skeer 2
-ieee 2
-huer 2
-bepen 2
-ever 2
-brewer 2
-behew 2
-beefy 2
-dear 2
-terr 2
-sneer 2
-sier 2
-repr 2
-cerer 2
-blear 2
-feyer 2
-gees 2
-beer 0
-burr 2
-eker 2
-brrr 2
-reen 2
-baar 2
-emeer 2
-weer 1
-bearer 2
-bevel 2
-neer 1
-lear 2
-beds 2
-mewer 2
-bree 2
-fleer 2
-feet 2
-rear 2
-ower 2
-steer 2
-sever 2
-seel 2
-birr 2
-bhar 2
-beefs 2
-heer 1
-yeel 2
-feed 2
-dewer 2
-weep 2
-sweer 2
-nee 2
-beefer 2
-bebed 2
-oer 2
-beden 2
-bets 2
-beng 2
-oyer 2
-bren 2
-beak 2
-beaner 2
-biker 2
-barr 2
-br 2
-berm 2
-leger 2
-serer 2
-ee 2
-leper 2
-pear 2
-ager 2
-baser 2
-eer 1
-defer 2
-waer 2
-boner 2
-brei 2
-bebar 2
-becher 2
-sleer 2
-smeer 2
-year 2
-sees 2
-heep 2
-bde 2
-bur 2
-benes 2
-jer 2
-weber 2
-need 2
-balr 2
-berg 2
-peel 2
-ween 2
-goer 2
-er 2
-oker 2
-theer 2
-regr 2
-kier 2
-tear 2
-vexer 2
-boder 2
-bleed 2
-ofer 2
-behear 2
-reem 2
-bee 1
-hexer 2
-bet 2
-beader 2
-oxer 2
-fewer 2
-bede 2
-bevor 2
-ler 2
-reet 2
-wees 2
-jees 2
-beef 1
-bert 2
-deer 1
-sewer 2
-beid 2
-suer 2
-weir 2
-bever 1
-blee 2
-byee 2
-betes 2
-bere 2
-beeth 2
-eeler 2
-beele 2
-jeep 2
-bell 2
-bester 2
-bern 2
-geer 1
-lee 2
-bed 2
-bean 2
-merer 2
-barer 2
-bkpr 2
-belier 2
-beam 2
-geed 2
-lier 2
-reel 2
-teel 2
-boar 2
-dier 2
-queer 2
-biter 2
-ben 2
-beater 2
-beest 2
-jeel 2
-leek 2
-eir 2
-beat 2
-meer 1
-neper 2
-belt 2
-abner 2
-meter 2
-near 2
-begger 2
-feer 1
-brier 2
-jeez 2
-seek 2
-bleu 2
-beret 2
-beeve 2
-cee 2
-err 2
-begem 2
-beno 2
-meek 2
-bower 2
-bye 2
-sker 2
-seem 2
-bae 2
-bklr 2
-beety 2
-lever 2
-beri 2
-mer 2
-boe 2
-bejel 2
-jeed 2
-deep 2
-kees 2
-tee 2
-beaver 2
-beech 2
-peen 2
-bemar 2
-beset 2
-ree 2
-bel 2
-bedur 2
-benu 2
-jeer 1
-newer 2
-bewet 2
-depr 2
-user 2
-seor 2
-brr 2
-bef 2
-beld 2
-begs 2
-deed 2
-eyer 2
-bear 1
-boxer 2
-buyer 2
-peer 1
-yees 2
-keef 2
-bleb 2
-beja 2
-gear 2
-breek 2
-bea 2
-best 2
-oner 2
-bar 2
-bael 2
-bor 2
-begar 2
-benet 2
-hewer 2
-keek 2
-kee 2
-bes 2
-dyer 2
-see 2
-ser 2
-eel 2
-betear 2
-refer 2
-never 2
-beni 2
-teed 2
-refr 2
-vee 2
-blea 2
-geek 2
-ber 1
-zeed 2
-blier 2
-veer 1
-bens 2
-brew 2
-beme 2
-pee 2
-reef 2
-ear 2
-deter 2
-besee 2
-beal 2
-leet 2
-neet 2
-baker 2
-bret 2
-bedder 2
-beamer 2
-bent 2
-boer 1
-wee 2
-teem 2
-zee 2
-aer 2
-bein 2
-peter 2
-benn 2
-rever 2
-be 2
-belar 2
-fee 2
+## Example
+
+`GET /passwords/password`
+
+```json
+{
+  "#passwor": 2,
+  "1Assword": 2,
+  "1Password": 2,
+  "1passwor": 2,
+  "1password": 1,
+  "2passwor": 2,
+  "4passwor": 2,
+  "4password": 1,
+  "P1ssword": 2,
+  "P4ssword": 2,
+  "P@ssword": 2,
+  "PAssword": 2,
+  "Pass1word": 2,
+  "PassLord": 2,
+  "PassWord": 2,
+  "Passord": 2,
+  "Passvord": 2,
+  "Passw0rd": 2,
+  "Passwor": 2,
+  "Passwor1": 2,
+  "Passwor3": 2,
+  "PassworD": 2,
+  "Password": 1,
+  "Passwort": 2,
+  "apasswor": 2,
+  "apassword": 1,
+  "assw0rd": 2,
+  "asswor": 2,
+  "assword": 1,
+  "basswood": 2,
+  "lassword": 1,
+  "lastword": 2,
+  "mypassword": 2,
+  "nopassword": 2,
+  "p1ssword": 1,
+  "p2ssw0rd": 2,
+  "p2ssword": 1,
+  "p4ssw0rd": 2,
+  "p4ssword": 1,
+  "p8ssw0rd": 2,
+  "p@ssw0rd": 2,
+  "p@ssword": 1,
+  "pAssw0rd": 2,
+  "pa$$word": 2,
+  "pa11word": 2,
+  "pa22word": 2,
+  "pa33word": 2,
+  "pa44word": 2,
+  "pa55word": 2,
+  "pa88word": 2,
+  "packword": 2,
+  "paddword": 2,
+  "pas1word": 1,
+  "pas3word": 1,
+  "pas5w0rd": 2,
+  "pas5word": 1,
+  "pashword": 1,
+  "pass12word": 2,
+  "pass1wor": 2,
+  "pass1word": 1,
+  "pass2wor": 2,
+  "pass2word": 1,
+  "pass3word": 1,
+  "pass55word": 2,
+  "pass7wor": 2,
+  "pass99word": 2,
+  "passWord": 1,
+  "pass_word": 1,
+  "passard": 2,
+  "passcard": 2,
+  "passcord": 1,
+  "passeird": 2,
+  "passforu": 2,
+  "passmore": 2,
+  "passoerd": 2,
+  "passor": 2,
+  "passord": 1,
+  "passowrd": 2,
+  "passpor": 2,
+  "passporn": 2,
+  "passport": 2,
+  "passswor": 2,
+  "passsword": 1,
+  "passuerd": 2,
+  "passvord": 1,
+  "passw0r": 2,
+  "passw0rd": 1,
+  "passw0rt": 2,
+  "passw2rd": 1,
+  "passw3rd": 1,
+  "passwar": 2,
+  "passward": 1,
+  "passwd": 2,
+  "passwerd": 1,
+  "passwird": 1,
+  "passwo": 2,
+  "passwo1": 2,
+  "passwod": 1,
+  "passwods": 2,
+  "passwoed": 1,
+  "passwoid": 1,
+  "passwolf": 2,
+  "passwood": 1,
+  "passwoord": 1,
+  "passwor": 1,
+  "passwor1": 1,
+  "passwor2d": 1,
+  "passwor5": 1,
+  "passwor7": 1,
+  "passwor9": 1,
+  "passworD": 1,
+  "password": 0,
+  "password!": 2,
+  "password$": 2,
+  "password-": 2,
+  "password.": 2,
+  "password0": 2,
+  "password1": 2,
+  "password2": 2,
+  "password3": 2,
+  "password4": 2,
+  "password5": 2,
+  "password6": 2,
+  "password7": 2,
+  "password8": 2,
+  "password9": 2,
+  "password?": 2,
+  "password@": 2,
+  "passworda": 2,
+  "passwordd": 1,
+  "passwordg": 2,
+  "passwordn": 2,
+  "passwordp": 2,
+  "passwords": 2,
+  "passwordx": 2,
+  "passworf": 1,
+  "passwork": 1,
+  "passworld": 1,
+  "passworm": 1,
+  "passworr": 1,
+  "passwort": 1,
+  "passwort1": 2,
+  "passworth": 2,
+  "passworx": 1,
+  "passwprd": 1,
+  "passwrd": 1,
+  "passwrod": 2,
+  "passwud": 2,
+  "passwurd": 1,
+  "pastword": 1,
+  "pasvord": 2,
+  "pasw0rd": 2,
+  "paswoord": 2,
+  "paswor": 2,
+  "pasword": 1,
+  "pasworld": 2,
+  "paswrd": 2,
+  "patsword": 1,
+  "paword": 2,
+  "paxxword": 2,
+  "pazzword": 2,
+  "pissword": 1,
+  "psswrd": 2,
+  "psword": 2,
+  "pussword": 1,
+  "rpassword": 1,
+  "ssword": 2,
+  "wasspord": 2
+}
 ```
