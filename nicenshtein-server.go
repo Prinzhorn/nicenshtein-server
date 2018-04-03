@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -124,8 +125,14 @@ func collectClosestWords(out *map[string]byte, currentNode *node, word string, d
 	}
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
-	word := r.URL.Path[1:]
+func millionHandler(w http.ResponseWriter, req *http.Request) {
+	word := req.URL.Path[len("/1e6"):]
+
+	if word == "" {
+		fmt.Fprintln(w, "Specify a word like /1e6/password")
+		return
+	}
+
 	out := make(map[string]byte)
 
 	start := time.Now()
@@ -134,9 +141,29 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("Searched %s in %s\n", word, time.Now().Sub(start))
 
-	for word, distance := range out {
+	/*for word, distance := range out {
 		fmt.Fprintln(w, word, distance)
+	}*/
+
+	jsonData, err := json.MarshalIndent(out, "", "  ")
+
+	if err != nil {
+		log.Fatal(err)
+		http.Error(w, "Could not convert to json", 500)
+		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonData)
+}
+
+func defaultHandler(w http.ResponseWriter, req *http.Request) {
+	if req.URL.Path != "/" {
+		http.NotFound(w, req)
+		return
+	}
+
+	fmt.Fprintln(w, "Heelo")
 }
 
 func main() {
@@ -150,6 +177,7 @@ func main() {
 
 	log.Printf("Indexed in %s\n", time.Now().Sub(start))
 
-	http.HandleFunc("/", handler)
+	http.HandleFunc("/1e6/", millionHandler)
+	http.HandleFunc("/", defaultHandler)
 	http.ListenAndServe(":8080", nil)
 }
