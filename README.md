@@ -1,5 +1,7 @@
 # Nicenshtein Server
 
+HTTP Server for [nicenshtein](https://github.com/Prinzhorn/nicenshtein).
+
 Answers GET requests with closest words according to Levenshtein distance <= 2.
 
 So far two datasets are indexed. See [https://nicenshtein.now.sh](https://nicenshtein.now.sh).
