@@ -16,7 +16,7 @@ var indexHTML []byte
 func niceHandler(w http.ResponseWriter, req *http.Request, nice *nicenshtein.Nicenshtein, word string) {
 	start := time.Now()
 
-	out := make(map[string]byte)
+	out := make(map[string]int)
 	nice.CollectWords(&out, word, 2)
 
 	log.Printf("Searched %s in %s\n", word, time.Now().Sub(start))
