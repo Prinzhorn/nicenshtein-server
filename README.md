@@ -1,3 +1,5 @@
+Note: this was mostly meant for me to learn some basic Go. Right now it is really slow for distances > 2 (slower than the naive approach).
+
 # Nicenshtein Server
 
 HTTP Server for [Nicenshtein](https://github.com/Prinzhorn/nicenshtein).
